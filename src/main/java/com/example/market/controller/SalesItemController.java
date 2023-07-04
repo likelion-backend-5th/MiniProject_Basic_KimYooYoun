@@ -4,6 +4,7 @@ import com.example.market.dto.response.Response;
 import com.example.market.dto.request.SalesItemCreateRequest;
 import com.example.market.dto.response.ResponseMessage;
 import com.example.market.service.SalesItemService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +18,7 @@ public class SalesItemController {
 	private final SalesItemService salesItemService;
 
 	@PostMapping
-	public Response<String> create(@RequestBody SalesItemCreateRequest request) {
+	public Response<String> create(@Valid @RequestBody SalesItemCreateRequest request) {
 		salesItemService.create(
 			request.getTitle(),
 			request.getDescription(),

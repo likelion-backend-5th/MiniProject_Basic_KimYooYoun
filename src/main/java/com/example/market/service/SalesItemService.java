@@ -6,6 +6,7 @@ import com.example.market.repository.SalesItemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -14,6 +15,7 @@ public class SalesItemService {
 
 	private final SalesItemRepository repository;
 
+	@Transactional
 	public void create(
 			String title,
 			String description,
@@ -24,5 +26,7 @@ public class SalesItemService {
 		repository.save(
 			SalesItemEntity.of(title, description, minPrice, ItemStatusType.ON_SALE, writer, password));
 	}
+
+
 
 }

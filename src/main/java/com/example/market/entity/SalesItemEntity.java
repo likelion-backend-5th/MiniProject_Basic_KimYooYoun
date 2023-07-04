@@ -9,6 +9,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,17 +28,23 @@ public class SalesItemEntity {
 	@Column(name = "menu_id")
 	private Long id;
 	@Column(nullable = false)
+	@NotBlank(message = "title is required")
 	private String title;
 	@Column(nullable = false)
+	@NotBlank(message = "description is required")
 	private String description;
 	@Column(name = "image_url")
 	private String imageUrl;
 	@Column(name = "min_price_wanted", nullable = false)
-	private int minPrice;
+	@NotNull(message = "price is required")
+	private Integer minPrice;
 	@Enumerated(EnumType.STRING)
 	private ItemStatusType status;
 	@Column(nullable = false)
+	@NotBlank(message = "writer is required")
 	private String writer;
+	@Column(nullable = false)
+	@NotBlank(message = "password is required")
 	private String password;
 	@Tolerate
 	public SalesItemEntity() {}
