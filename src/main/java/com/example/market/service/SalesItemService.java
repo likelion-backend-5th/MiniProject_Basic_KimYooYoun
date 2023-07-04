@@ -40,23 +40,14 @@ public class SalesItemService {
 		SalesItemEntity savedItem = repository.findById(salesItemId).orElseThrow( () ->
 			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
 
-		if(isValidPassword(password, savedItem)) {
-			savedItem = SalesItemEntity.builder()
-				.title(title)
-				.description(description)
-				.status(savedItem.getStatus())
-				.minPrice(minPrice)
-				.writer(writer)
-				.password(password)
-				.build();
-			repository.saveAndFlush(savedItem);
-		}
+		if(!isValidPassword(password, savedItem))
+			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+
+		savedItem.updateSalesItem(title, description, minPrice, writer, password);
+		repository.saveAndFlush(savedItem);
 	}
 
 	private boolean isValidPassword(String inputPassword, SalesItemEntity savedItem){
 		return inputPassword.equals(savedItem.getPassword());
 	}
-
-
-
 }
