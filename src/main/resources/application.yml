@@ -16,6 +16,9 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
-        
+  http:
+    encoding:
+      charset=UTF-8:
+
 logging.level:
   org.hibernate.SQL: debug
