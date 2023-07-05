@@ -1,6 +1,7 @@
 package com.example.market.controller;
 
 import com.example.market.dto.request.CommentDeleteRequest;
+import com.example.market.dto.request.CommentReplyRequest;
 import com.example.market.dto.request.CommentRequest;
 import com.example.market.dto.response.Response;
 import com.example.market.dto.response.ResponseMessage;
@@ -16,27 +17,35 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/items")
+@RequestMapping("/items/{itemId}/comments/")
 @RequiredArgsConstructor
 @Slf4j
 public class CommentController {
 	private final CommentService commentService;
 
-	@PostMapping("/{itemId}/comments")
+	@PostMapping
 	public Response<String> create(@PathVariable Long itemId, @RequestBody CommentRequest request){
 		commentService.create(itemId, request.getWriter(), request.getPassword(), request.getContent());
 		return Response.success(ResponseMessage.SUCCESS_COMMENT_CREATE);
 	}
 
-	@PutMapping("/{itemId}/comments/{commentId}")
+	@PutMapping("/{commentId}")
 	public Response<String> modify(@PathVariable Long itemId,
-									@PathVariable Long commentId,
-									@RequestBody CommentRequest request){
+								@PathVariable Long commentId,
+								@RequestBody CommentRequest request){
 		commentService.modify(itemId, commentId, request.getWriter(), request.getPassword(), request.getContent());
 		return Response.success(ResponseMessage.SUCCESS_COMMENT_MODIFY);
 	}
 
-	@DeleteMapping("/{itemId}/comments/{commentId}")
+	@PutMapping("/{commentId}/reply")
+	public Response<String> reply(@PathVariable Long itemId,
+								@PathVariable Long commentId,
+								@RequestBody CommentReplyRequest request){
+		commentService.reply(itemId, commentId, request.getWriter(), request.getPassword(), request.getReply());
+		return Response.success(ResponseMessage.SUCCESS_COMMENT_REPLY_CREATE);
+	}
+
+	@DeleteMapping("/{commentId}")
 	public Response<String> delete(@PathVariable Long itemId,
 									@PathVariable Long commentId,
 									@RequestBody CommentDeleteRequest request){
