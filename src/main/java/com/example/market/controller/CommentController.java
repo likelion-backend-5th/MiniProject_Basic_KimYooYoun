@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,4 +25,13 @@ public class CommentController {
 		commentService.create(itemId, request.getWriter(), request.getPassword(), request.getContent());
 		return Response.success(ResponseMessage.SUCCESS_COMMENT_CREATE);
 	}
+
+	@PutMapping("/{itemId}/comments/{commentId}")
+	public Response<String> modify(@PathVariable Long itemId,
+									@PathVariable Long commentId,
+									@RequestBody CommentRequest request){
+		commentService.modify(itemId, commentId, request.getWriter(), request.getPassword(), request.getContent());
+		return Response.success(ResponseMessage.SUCCESS_COMMENT_MODIFY);
+	}
+
 }

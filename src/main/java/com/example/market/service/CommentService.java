@@ -8,6 +8,7 @@ import com.example.market.repository.CommentRepository;
 import com.example.market.repository.SalesItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,11 +16,30 @@ public class CommentService {
 
 	private final SalesItemRepository salesItemRepository;
 	private final CommentRepository commentRepository;
+	@Transactional
 	public void create(Long itemId, String writer, String password, String contents){
 		SalesItemEntity savedItem = salesItemRepository.findById(itemId).orElseThrow( () ->
 			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
 
 		commentRepository.save(CommentEntity.of(savedItem, writer, password, contents));
+	}
+	@Transactional
+	public void modify(Long itemId, Long commentId, String writer, String inputPassword, String contents){
+
+		SalesItemEntity savedItem = salesItemRepository.findById(itemId).orElseThrow( () ->
+			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
+
+		CommentEntity savedComment = commentRepository.findById(commentId).orElseThrow( () ->
+			new ApplicationException(ErrorCode.COMMENT_NOT_FOUND));
+
+		if(!isValidPassword(inputPassword, savedComment))
+			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+
+		savedComment.updateComment(writer, inputPassword, contents);
+		commentRepository.saveAndFlush(savedComment);
+	}
+	private boolean isValidPassword(String inputPassword, CommentEntity savedItem){
+		return inputPassword.equals(savedItem.getPassword());
 	}
 
 }
