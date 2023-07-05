@@ -28,6 +28,7 @@ public class CommentEntity extends BaseDateEntity{
 	@Column(name = "comment_id")
 	private Long id;
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "item_id")
 	private SalesItemEntity salesItem;
 	@Column(nullable = false)
 	@NotBlank(message = "writer is required")
