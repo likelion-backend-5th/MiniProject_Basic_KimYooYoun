@@ -34,6 +34,7 @@ public class SalesItemEntity extends BaseDateEntity{
 	@Column(nullable = false)
 	@NotBlank(message = "description is required")
 	private String description;
+	@Setter
 	@Column(name = "image_url")
 	private String imageUrl;
 	@Column(name = "min_price_wanted", nullable = false)

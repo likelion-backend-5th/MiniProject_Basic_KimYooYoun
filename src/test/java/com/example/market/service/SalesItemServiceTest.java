@@ -48,6 +48,7 @@ public class SalesItemServiceTest {
 		Assertions.assertDoesNotThrow(() -> service.modify(entity.getId(), "title", "description", 5000, "writer", "password"));
 	}
 
+
 	@Test
 	@DisplayName("중고물품 수정 시 id가 존재하지 않는 실패 테스트")
 	void SaliesItemModifyFailCausedByNottFoundId(){
@@ -109,5 +110,6 @@ public class SalesItemServiceTest {
 
 		Assertions.assertEquals(ErrorCode.INVALID_PASSWORD, e.getErrorCode());
 	}
+
 
 }
