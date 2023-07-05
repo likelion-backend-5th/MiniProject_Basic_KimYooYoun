@@ -1,11 +1,13 @@
 package com.example.market.controller;
 
+import com.example.market.dto.request.SalesItemDelteRequest;
 import com.example.market.dto.response.Response;
 import com.example.market.dto.request.SalesItemRequest;
 import com.example.market.dto.response.ResponseMessage;
 import com.example.market.service.SalesItemService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -41,6 +43,12 @@ public class SalesItemController {
 			request.getPassword()
 		);
 		return new Response<>(ResponseMessage.SUCCESS_ITEM_MODIFY);
+	}
+
+	@DeleteMapping("/{itemId}")
+	public Response<String> delete(@PathVariable Long itemId, @RequestBody SalesItemDelteRequest request){
+		salesItemService.delete(itemId, request.getWriter(), request.getPassword());
+		return new Response<>(ResponseMessage.SUCCESS_ITEM_DELETE);
 	}
 
 }

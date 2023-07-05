@@ -28,7 +28,7 @@ public class SalesItemService {
 		repository.save(
 			SalesItemEntity.of(title, description, minPrice, ItemStatusType.ON_SALE, writer, password));
 	}
-
+	@Transactional
 	public void modify(
 		Long salesItemId,
 		String title,
@@ -49,5 +49,18 @@ public class SalesItemService {
 
 	private boolean isValidPassword(String inputPassword, SalesItemEntity savedItem){
 		return inputPassword.equals(savedItem.getPassword());
+	}
+	@Transactional
+	public void delete(Long salesItemId, String writer, String password){
+		SalesItemEntity savedItem = repository.findById(salesItemId).orElseThrow( () ->
+			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
+
+		if(!isValidPassword(password, savedItem))
+			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+
+		//TODO :: deleteAllBysalesItem, comment, negotiation 전파
+		savedItem.setStatus(ItemStatusType.DELETED);
+		repository.saveAndFlush(savedItem);
+		repository.delete(savedItem);
 	}
 }
