@@ -29,7 +29,7 @@ public class SalesItemEntity extends BaseDateEntity{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "item_id")
-	private Long id;
+	private Long itemId;
 	@Column(nullable = false)
 	@NotBlank(message = "title is required")
 	private String title;
