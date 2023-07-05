@@ -9,7 +9,7 @@ public class SalesItemFixture {
 			title,
 			description,
 			minPrice,
-			ItemStatusType.ON_SALE,
+			ItemStatusType.판매중,
 			writer,
 			password
 		);
