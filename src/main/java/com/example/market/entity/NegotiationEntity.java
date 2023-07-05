@@ -63,4 +63,14 @@ public class NegotiationEntity extends BaseDateEntity{
 			.status(status)
 			.build();
 	}
+	public NegotiationEntity updateNegotiation(String writer, String password, int suggestedPrice){
+		this.writer = writer;
+		this.password = password;
+		this.suggestedPrice = suggestedPrice;
+		return this;
+	}
+	public NegotiationEntity updateStatus(NegotiationStatusType type){
+		this.status = type;
+		return this;
+	}
 }

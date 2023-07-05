@@ -43,9 +43,9 @@ public class SalesItemServiceTest {
 	void SalesItemModifySuccess(){
 		SalesItemEntity entity = SalesItemFixture.get("title", "description", 10000, "writer", "password");
 
-		when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
+		when(repository.findById(entity.getItemId())).thenReturn(Optional.of(entity));
 
-		Assertions.assertDoesNotThrow(() -> service.modify(entity.getId(), "title", "description", 5000, "writer", "password"));
+		Assertions.assertDoesNotThrow(() -> service.modify(entity.getItemId(), "title", "description", 5000, "writer", "password"));
 	}
 
 
@@ -54,10 +54,10 @@ public class SalesItemServiceTest {
 	void SaliesItemModifyFailCausedByNottFoundId(){
 		SalesItemEntity entity = SalesItemFixture.get("title", "description", 10000, "writer", "password");
 
-		when(repository.findById(entity.getId())).thenReturn(Optional.empty());
+		when(repository.findById(entity.getItemId())).thenReturn(Optional.empty());
 
 		ApplicationException e = Assertions.assertThrows(ApplicationException.class,
-			() -> service.modify(entity.getId(), "title", "description", 5000, "writer", "password"));
+			() -> service.modify(entity.getItemId(), "title", "description", 5000, "writer", "password"));
 		Assertions.assertEquals(ErrorCode.SALES_ITEM_NOT_FOUND, e.getErrorCode());
 	}
 
@@ -66,9 +66,9 @@ public class SalesItemServiceTest {
 	void SaliesItemModifyFailCausedByNotAuthorizePassword(){
 		SalesItemEntity entity = SalesItemFixture.get("title", "description", 10000, "writer", "password");
 
-		when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
+		when(repository.findById(entity.getItemId())).thenReturn(Optional.of(entity));
 		ApplicationException e = Assertions.assertThrows(ApplicationException.class,
-			() -> service.modify(entity.getId(), "title", "description", 5000, "writer", "not"));
+			() -> service.modify(entity.getItemId(), "title", "description", 5000, "writer", "not"));
 
 		Assertions.assertEquals(ErrorCode.INVALID_PASSWORD, e.getErrorCode());
 	}
@@ -78,12 +78,12 @@ public class SalesItemServiceTest {
 	void SalesItemDeleteSuccess(){
 		SalesItemEntity entity = SalesItemFixture.get("title", "description", 10000, "writer", "password");
 
-		when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
+		when(repository.findById(entity.getItemId())).thenReturn(Optional.of(entity));
 
 		Assertions.assertDoesNotThrow(() -> {
-			service.delete(entity.getId(), "writer", "password");
-			Optional<SalesItemEntity> deletedEntity = repository.findById(entity.getId());
-			Assertions.assertEquals(ItemStatusType.DELETED, deletedEntity.get().getStatus());
+			service.delete(entity.getItemId(), "writer", "password");
+			Optional<SalesItemEntity> deletedEntity = repository.findById(entity.getItemId());
+			Assertions.assertEquals(ItemStatusType.판매종료, deletedEntity.get().getStatus());
 		});
 	}
 
@@ -92,10 +92,10 @@ public class SalesItemServiceTest {
 	void SaliesItemDeleteFailCausedByNottFoundId(){
 		SalesItemEntity entity = SalesItemFixture.get("title", "description", 10000, "writer", "password");
 
-		when(repository.findById(entity.getId())).thenReturn(Optional.empty());
+		when(repository.findById(entity.getItemId())).thenReturn(Optional.empty());
 
 		ApplicationException e = Assertions.assertThrows(ApplicationException.class,
-			() -> service.delete(entity.getId(), "writer", "password"));
+			() -> service.delete(entity.getItemId(), "writer", "password"));
 		Assertions.assertEquals(ErrorCode.SALES_ITEM_NOT_FOUND, e.getErrorCode());
 	}
 
@@ -104,9 +104,9 @@ public class SalesItemServiceTest {
 	void SaliesItemDeleteFailCausedByNotAuthorizePassword(){
 		SalesItemEntity entity = SalesItemFixture.get("title", "description", 10000, "writer", "password");
 
-		when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
+		when(repository.findById(entity.getItemId())).thenReturn(Optional.of(entity));
 		ApplicationException e = Assertions.assertThrows(ApplicationException.class,
-			() -> service.delete(entity.getId(), "writer", "not"));
+			() -> service.delete(entity.getItemId(), "writer", "not"));
 
 		Assertions.assertEquals(ErrorCode.INVALID_PASSWORD, e.getErrorCode());
 	}
