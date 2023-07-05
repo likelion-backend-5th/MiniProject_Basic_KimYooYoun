@@ -25,7 +25,6 @@ public class CommentService {
 	}
 	@Transactional
 	public void modify(Long itemId, Long commentId, String writer, String inputPassword, String contents){
-
 		SalesItemEntity savedItem = salesItemRepository.findById(itemId).orElseThrow( () ->
 			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
 
@@ -36,6 +35,20 @@ public class CommentService {
 			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
 
 		savedComment.updateComment(writer, inputPassword, contents);
+		commentRepository.saveAndFlush(savedComment);
+	}
+	@Transactional
+	public void reply(Long itemId, Long commentId, String writer, String inputPassword, String reply){
+		SalesItemEntity savedItem = salesItemRepository.findById(itemId).orElseThrow( () ->
+			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
+
+		CommentEntity savedComment = commentRepository.findById(commentId).orElseThrow( () ->
+			new ApplicationException(ErrorCode.COMMENT_NOT_FOUND));
+
+		if(!isValidPassword(inputPassword, savedComment))
+			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+
+		savedComment.addReply(reply);
 		commentRepository.saveAndFlush(savedComment);
 	}
 	private boolean isValidPassword(String inputPassword, CommentEntity savedItem){
