@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
 	SALES_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "SalesItem not founded"),
+	COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "Comment not founded"),
 	INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "Password is invalid")
 	;
 	private final HttpStatus status;

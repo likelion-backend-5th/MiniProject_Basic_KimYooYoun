@@ -51,8 +51,14 @@ public class CommentEntity extends BaseDateEntity{
 			.build();
 	}
 
-	public CommentEntity updateReply(String reply){
+	public CommentEntity addReply(String reply){
 		this.reply = reply;
+		return this;
+	}
+	public CommentEntity updateComment(String writer, String password, String contents){
+		this.writer = writer;
+		this.password = password;
+		this.content = contents;
 		return this;
 	}
 
