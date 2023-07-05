@@ -2,6 +2,7 @@ package com.example.market.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,10 +24,8 @@ public class CommentEntity extends BaseDateEntity{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@Column(nullable = false)
-	@ManyToOne
-	@JoinColumn(name = "item_id")
-	private SalesItemEntity itemId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	private SalesItemEntity salesItem;
 	@Column(nullable = false)
 	@NotBlank(message = "writer is required")
 	private String writer;
@@ -43,15 +42,18 @@ public class CommentEntity extends BaseDateEntity{
 			SalesItemEntity salesItemEntity,
 			String writer,
 			String password,
-			String content,
-			String reply) {
+			String content) {
 		return CommentEntity.builder()
-			.itemId(salesItemEntity)
+			.salesItem(salesItemEntity)
 			.writer(writer)
 			.password(password)
 			.content(content)
-			.reply(reply)
 			.build();
+	}
+
+	public CommentEntity updateReply(String reply){
+		this.reply = reply;
+		return this;
 	}
 
 }
