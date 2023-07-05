@@ -2,6 +2,8 @@ package com.example.market.service;
 
 import com.example.market.constants.ItemStatusType;
 import com.example.market.entity.SalesItemEntity;
+import com.example.market.exception.ApplicationException;
+import com.example.market.exception.ErrorCode;
 import com.example.market.repository.SalesItemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +29,25 @@ public class SalesItemService {
 			SalesItemEntity.of(title, description, minPrice, ItemStatusType.ON_SALE, writer, password));
 	}
 
+	public void modify(
+		Long salesItemId,
+		String title,
+		String description,
+		int minPrice,
+		String writer,
+		String password
+	){
+		SalesItemEntity savedItem = repository.findById(salesItemId).orElseThrow( () ->
+			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
 
+		if(!isValidPassword(password, savedItem))
+			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
 
+		savedItem.updateSalesItem(title, description, minPrice, writer, password);
+		repository.saveAndFlush(savedItem);
+	}
+
+	private boolean isValidPassword(String inputPassword, SalesItemEntity savedItem){
+		return inputPassword.equals(savedItem.getPassword());
+	}
 }

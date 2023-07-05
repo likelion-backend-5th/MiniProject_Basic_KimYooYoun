@@ -2,9 +2,11 @@ package com.example.market.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 @Getter
-@AllArgsConstructor
-public class SalesItemCreateRequest {
+@NoArgsConstructor
+public class SalesItemRequest {
 	String title;
 	String description;
 	int minPriceWanted;

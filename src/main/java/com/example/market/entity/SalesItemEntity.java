@@ -65,4 +65,14 @@ public class SalesItemEntity {
 			.password(password)
 			.build();
 	}
+
+	public SalesItemEntity updateSalesItem(String title, String description, int minPrice, String writer,
+		String password){
+		this.title = title;
+		this.description = description;
+		this.minPrice = minPrice;
+		this.writer = writer;
+		this.password = password;
+		return this;
+	}
 }
