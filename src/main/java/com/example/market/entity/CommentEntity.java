@@ -14,15 +14,18 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.Tolerate;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Table(name = "comments")
 @Getter
 @Builder
-@SQLDelete(sql = "UPDATE comments SET deleted_at = NOW() where item_id = ?")
+@SQLDelete(sql = "UPDATE comments SET deleted_at = NOW() where comment_id = ?")
+@Where(clause = "deleted_at is NULL")
 public class CommentEntity extends BaseDateEntity{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "comment_id")
 	private Long id;
 	@ManyToOne(fetch = FetchType.LAZY)
 	private SalesItemEntity salesItem;
