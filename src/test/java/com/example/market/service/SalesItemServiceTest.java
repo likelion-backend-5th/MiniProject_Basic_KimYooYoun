@@ -5,6 +5,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.example.market.entity.SalesItemEntity;
+import com.example.market.exception.ApplicationException;
+import com.example.market.exception.ErrorCode;
 import com.example.market.fixture.SalesItemFixture;
 import com.example.market.repository.SalesItemRepository;
 import jakarta.validation.ConstraintViolationException;
@@ -30,7 +32,42 @@ public class SalesItemServiceTest {
 	@DisplayName("중고물품 등록 성공 테스트")
 	void SalesItemCreateSuccess(){
 		when(repository.save(any())).thenReturn(mock(SalesItemEntity.class));
+
 		Assertions.assertDoesNotThrow(() -> service.create("title", "discription", 10000, "writer", "passwood"));
+	}
+
+	@Test
+	@DisplayName("중고물품 수정 성공 테스트")
+	void SalesItemModifySuccess(){
+		SalesItemEntity entity = SalesItemFixture.get("title", "description", 10000, "writer", "password");
+
+		when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
+
+		Assertions.assertDoesNotThrow(() -> service.modify(entity.getId(), "title", "description", 5000, "writer", "password"));
+	}
+
+	@Test
+	@DisplayName("중고물품 수정 시 id가 존재하지 않는 실패 테스트")
+	void SaliesItemModifyFailCausedByNottFoundId(){
+		SalesItemEntity entity = SalesItemFixture.get("title", "description", 10000, "writer", "password");
+
+		when(repository.findById(entity.getId())).thenReturn(Optional.empty());
+
+		ApplicationException e = Assertions.assertThrows(ApplicationException.class,
+			() -> service.modify(entity.getId(), "title", "description", 5000, "writer", "password"));
+		Assertions.assertEquals(ErrorCode.SALES_ITEM_NOT_FOUND, e.getErrorCode());
+	}
+
+	@Test
+	@DisplayName("중고물품 수정 시 패스워드가 알치하지 않는 실패 테스트")
+	void SaliesItemModifyFailCausedByNotAuthorizePassword(){
+		SalesItemEntity entity = SalesItemFixture.get("title", "description", 10000, "writer", "password");
+
+		when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
+		ApplicationException e = Assertions.assertThrows(ApplicationException.class,
+			() -> service.modify(entity.getId(), "title", "description", 5000, "writer", "not"));
+
+		Assertions.assertEquals(ErrorCode.INVALID_PASSWORD, e.getErrorCode());
 	}
 
 }
