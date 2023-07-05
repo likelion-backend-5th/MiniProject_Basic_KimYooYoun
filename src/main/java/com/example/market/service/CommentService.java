@@ -41,5 +41,18 @@ public class CommentService {
 	private boolean isValidPassword(String inputPassword, CommentEntity savedItem){
 		return inputPassword.equals(savedItem.getPassword());
 	}
+	@Transactional
+	public void delete(Long itemId, Long commentId, String writer, String inputPassword){
+		SalesItemEntity savedItem = salesItemRepository.findById(itemId).orElseThrow( () ->
+			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
+
+		CommentEntity savedComment = commentRepository.findById(commentId).orElseThrow( () ->
+			new ApplicationException(ErrorCode.COMMENT_NOT_FOUND));
+
+		if(!isValidPassword(inputPassword, savedComment))
+			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+
+		commentRepository.delete(savedComment);
+	}
 
 }
