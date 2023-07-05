@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.Tolerate;
 import org.hibernate.annotations.SQLDelete;
 
@@ -21,11 +22,11 @@ import org.hibernate.annotations.SQLDelete;
 @Table(name = "sales_item")
 @Getter
 @Builder
-@SQLDelete(sql = "UPDATE sales_item SET status = 'DELETE' where id = ?")
-public class SalesItemEntity {
+@SQLDelete(sql = "UPDATE sales_item SET deleted_at = NOW() where item_id = ?")
+public class SalesItemEntity extends BaseDateEntity{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "menu_id")
+	@Column(name = "item_id")
 	private Long id;
 	@Column(nullable = false)
 	@NotBlank(message = "title is required")
@@ -33,11 +34,13 @@ public class SalesItemEntity {
 	@Column(nullable = false)
 	@NotBlank(message = "description is required")
 	private String description;
+	@Setter
 	@Column(name = "image_url")
 	private String imageUrl;
 	@Column(name = "min_price_wanted", nullable = false)
 	@NotNull(message = "price is required")
 	private Integer minPrice;
+	@Setter
 	@Enumerated(EnumType.STRING)
 	private ItemStatusType status;
 	@Column(nullable = false)

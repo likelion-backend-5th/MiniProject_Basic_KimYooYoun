@@ -1,14 +1,19 @@
 package com.example.market.service;
 
 import com.example.market.constants.ItemStatusType;
+import com.example.market.dto.SalesItemDto;
 import com.example.market.entity.SalesItemEntity;
 import com.example.market.exception.ApplicationException;
 import com.example.market.exception.ErrorCode;
 import com.example.market.repository.SalesItemRepository;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Slf4j
@@ -28,7 +33,7 @@ public class SalesItemService {
 		repository.save(
 			SalesItemEntity.of(title, description, minPrice, ItemStatusType.ON_SALE, writer, password));
 	}
-
+	@Transactional
 	public void modify(
 		Long salesItemId,
 		String title,
@@ -49,5 +54,41 @@ public class SalesItemService {
 
 	private boolean isValidPassword(String inputPassword, SalesItemEntity savedItem){
 		return inputPassword.equals(savedItem.getPassword());
+	}
+	@Transactional
+	public void addImage(Long salesItemId, MultipartFile multipartFile, String writer, String password)
+		throws IOException
+	{
+		SalesItemEntity savedItem = repository.findById(salesItemId).orElseThrow( () ->
+			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
+
+		if(!isValidPassword(password, savedItem))
+			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+
+		String fileName = getImagePath(salesItemId, multipartFile);
+		multipartFile.transferTo(Path.of(fileName));
+		savedItem.setImageUrl(String.format("/static/%d/%s", salesItemId, fileName));
+		repository.saveAndFlush(savedItem);
+	}
+	private String getImagePath(Long id, MultipartFile file) throws IOException {
+		String imageDir = String.format("media/%d/", id);
+		Files.createDirectories(Path.of(imageDir));
+
+		String[] fileName = file.getOriginalFilename().split("\\.");
+		String imageFileName = "image."+ fileName[fileName.length - 1];
+		return imageDir + imageFileName;
+	}
+	@Transactional
+	public void delete(Long salesItemId, String writer, String password){
+		SalesItemEntity savedItem = repository.findById(salesItemId).orElseThrow( () ->
+			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
+
+		if(!isValidPassword(password, savedItem))
+			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+
+		//TODO :: deleteAllBysalesItem, comment, negotiation 전파
+		savedItem.setStatus(ItemStatusType.DELETED);
+		repository.saveAndFlush(savedItem);
+		repository.delete(savedItem);
 	}
 }

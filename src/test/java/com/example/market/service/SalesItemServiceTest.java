@@ -1,9 +1,11 @@
 package com.example.market.service;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.example.market.constants.ItemStatusType;
 import com.example.market.entity.SalesItemEntity;
 import com.example.market.exception.ApplicationException;
 import com.example.market.exception.ErrorCode;
@@ -46,6 +48,7 @@ public class SalesItemServiceTest {
 		Assertions.assertDoesNotThrow(() -> service.modify(entity.getId(), "title", "description", 5000, "writer", "password"));
 	}
 
+
 	@Test
 	@DisplayName("중고물품 수정 시 id가 존재하지 않는 실패 테스트")
 	void SaliesItemModifyFailCausedByNottFoundId(){
@@ -69,5 +72,44 @@ public class SalesItemServiceTest {
 
 		Assertions.assertEquals(ErrorCode.INVALID_PASSWORD, e.getErrorCode());
 	}
+
+	@Test
+	@DisplayName("중고물품 삭제 성공 테스트")
+	void SalesItemDeleteSuccess(){
+		SalesItemEntity entity = SalesItemFixture.get("title", "description", 10000, "writer", "password");
+
+		when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
+
+		Assertions.assertDoesNotThrow(() -> {
+			service.delete(entity.getId(), "writer", "password");
+			Optional<SalesItemEntity> deletedEntity = repository.findById(entity.getId());
+			Assertions.assertEquals(ItemStatusType.DELETED, deletedEntity.get().getStatus());
+		});
+	}
+
+	@Test
+	@DisplayName("중고물품 삭제 시 id가 존재하지 않는 실패 테스트")
+	void SaliesItemDeleteFailCausedByNottFoundId(){
+		SalesItemEntity entity = SalesItemFixture.get("title", "description", 10000, "writer", "password");
+
+		when(repository.findById(entity.getId())).thenReturn(Optional.empty());
+
+		ApplicationException e = Assertions.assertThrows(ApplicationException.class,
+			() -> service.delete(entity.getId(), "writer", "password"));
+		Assertions.assertEquals(ErrorCode.SALES_ITEM_NOT_FOUND, e.getErrorCode());
+	}
+
+	@Test
+	@DisplayName("중고물품 삭제 시 패스워드가 알치하지 않는 실패 테스트")
+	void SaliesItemDeleteFailCausedByNotAuthorizePassword(){
+		SalesItemEntity entity = SalesItemFixture.get("title", "description", 10000, "writer", "password");
+
+		when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
+		ApplicationException e = Assertions.assertThrows(ApplicationException.class,
+			() -> service.delete(entity.getId(), "writer", "not"));
+
+		Assertions.assertEquals(ErrorCode.INVALID_PASSWORD, e.getErrorCode());
+	}
+
 
 }

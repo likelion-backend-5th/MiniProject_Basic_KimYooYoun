@@ -34,4 +34,11 @@ public class GlobalControllerAdvice {
 			.body(e.getMessage());
 	}
 
+	@ExceptionHandler(RuntimeException.class)
+	public ResponseEntity<?> applicationHandler(RuntimeException e){
+		log.error("Error occurs {}", e.toString());
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+			.body(e.getMessage());
+	}
+
 }
