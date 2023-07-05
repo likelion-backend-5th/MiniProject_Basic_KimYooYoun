@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum ItemStatusType {
-	CREATED,
-	ON_SALE,
-	SOLD_OUT,
-	DELETED
+	등록중,
+	판매중,
+	판매완료,
+	판매종료
 }

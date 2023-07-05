@@ -11,6 +11,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,7 +35,20 @@ public class SalesItemService {
 			String password
 	) {
 		repository.save(
-			SalesItemEntity.of(title, description, minPrice, ItemStatusType.ON_SALE, writer, password));
+			SalesItemEntity.of(title, description, minPrice, ItemStatusType.판매중, writer, password));
+	}
+	public SalesItemDto getItem(Long SalesItemId){
+
+		SalesItemEntity savedItem = repository.findById(SalesItemId).orElseThrow( () ->
+			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
+
+		return SalesItemDto.fromEntity(savedItem);
+	}
+	public Page<SalesItemDto> getAllItems(int page, int limit){
+		Pageable pageable = PageRequest.of(page, limit);
+		Page<SalesItemEntity> result = repository.findAll(pageable);
+		log.info("Result: {}", result.getContent());
+		return result.map(SalesItemDto::fromEntity);
 	}
 	@Transactional
 	public void modify(
@@ -87,7 +104,7 @@ public class SalesItemService {
 			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
 
 		//TODO :: deleteAllBysalesItem, comment, negotiation 전파
-		savedItem.setStatus(ItemStatusType.DELETED);
+		savedItem.setStatus(ItemStatusType.판매종료);
 		repository.saveAndFlush(savedItem);
 		repository.delete(savedItem);
 	}

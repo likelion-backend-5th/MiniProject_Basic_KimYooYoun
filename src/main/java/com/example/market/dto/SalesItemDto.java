@@ -1,5 +1,6 @@
 package com.example.market.dto;
 
+import com.example.market.constants.ItemStatusType;
 import com.example.market.entity.SalesItemEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,16 +11,16 @@ public class SalesItemDto {
 	String title;
 	String description;
 	int minPriceWanted;
-	String writer;
-	String password;
+	String imageUrl;
+	String status;
 
 	public static SalesItemDto fromEntity(SalesItemEntity salesItemEntity){
 		return new SalesItemDto(
 			salesItemEntity.getTitle(),
 			salesItemEntity.getDescription(),
 			salesItemEntity.getMinPrice(),
-			salesItemEntity.getWriter(),
-			salesItemEntity.getPassword()
+			salesItemEntity.getImageUrl(),
+			salesItemEntity.getStatus().toString()
 		);
 	}
 }
