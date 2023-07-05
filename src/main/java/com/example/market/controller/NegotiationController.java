@@ -1,5 +1,6 @@
 package com.example.market.controller;
 
+import com.example.market.dto.request.NegotiationDeleteRequest;
 import com.example.market.dto.request.NegotiationRequest;
 import com.example.market.dto.request.NegotiationStatusRequest;
 import com.example.market.dto.response.Response;
@@ -9,6 +10,7 @@ import com.example.market.exception.ErrorCode;
 import com.example.market.service.NegotiationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -50,6 +52,12 @@ public class NegotiationController {
 				return Response.success(ResponseMessage.SUCCESS_NEGOTIATION_STATUS);
 		}
 		throw new ApplicationException(ErrorCode.INVALID_STATUS);
+	}
+	@DeleteMapping("/{proposalId}")
+	public Response<String> delete(@PathVariable Long proposalId,
+								@RequestBody NegotiationDeleteRequest request){
+		negotiationService.delete(proposalId, request.getWriter(), request.getPassword());
+		return Response.success(ResponseMessage.SUCCESS_NEGOTIATION_DELETE);
 	}
 
 }

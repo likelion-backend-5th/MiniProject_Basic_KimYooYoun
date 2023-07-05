@@ -78,6 +78,16 @@ public class NegotiationService {
 			.forEach(nego -> nego.updateStatus(NegotiationStatusType.거절));
 		negotiationRepository.saveAllAndFlush(rejectedProposals);
 	}
+	public void delete(Long proposalId, String writer, String inputPassword){
+		NegotiationEntity savedNego = negotiationRepository.findById(proposalId).orElseThrow( () ->
+			new ApplicationException(ErrorCode.NEGOTIATION_NOT_FOUND));
+
+		if(!isValidPassword(inputPassword, savedNego))
+			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+
+		negotiationRepository.delete(savedNego);
+	}
+
 	private boolean isValidPassword(String inputPassword, NegotiationEntity savedItem){
 		return inputPassword.equals(savedItem.getPassword());
 	}
