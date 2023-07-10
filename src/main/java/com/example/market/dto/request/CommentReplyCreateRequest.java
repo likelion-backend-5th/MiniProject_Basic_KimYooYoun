@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class CommentReplyRequest {
+public class CommentReplyCreateRequest {
 	private String writer;
 	private String password;
 	private String reply;

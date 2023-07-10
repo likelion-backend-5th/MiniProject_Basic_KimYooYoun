@@ -1,6 +1,6 @@
 package com.example.market.service;
 
-import com.example.market.dto.CommentDto;
+import com.example.market.dto.response.CommentResponse;
 import com.example.market.entity.CommentEntity;
 import com.example.market.entity.SalesItemEntity;
 import com.example.market.exception.ApplicationException;
@@ -27,11 +27,11 @@ public class CommentService {
 
 		commentRepository.save(CommentEntity.of(savedItem, writer, password, contents));
 	}
-	public Page<CommentDto> getAllCommentByItem(Long itemId){
+	public Page<CommentResponse> getAllCommentByItem(Long itemId){
 		SalesItemEntity savedItem = salesItemRepository.findById(itemId).orElseThrow( () ->
 			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
 		Pageable pageable = PageRequest.of(0, 10);
-		return commentRepository.findAllBySalesItemItemId(itemId, pageable).map(CommentDto::fromEntity);
+		return commentRepository.findAllBySalesItemItemId(itemId, pageable).map(CommentResponse::fromEntity);
 	}
 	@Transactional
 	public void modify(Long itemId, Long commentId, String writer, String inputPassword, String contents){

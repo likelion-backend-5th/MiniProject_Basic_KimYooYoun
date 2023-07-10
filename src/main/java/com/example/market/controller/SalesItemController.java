@@ -1,18 +1,16 @@
 package com.example.market.controller;
 
-import com.example.market.dto.SalesItemDto;
+import com.example.market.dto.response.SalesItemResponse;
 import com.example.market.dto.request.SalesItemDelteRequest;
 import com.example.market.dto.response.Response;
-import com.example.market.dto.request.SalesItemRequest;
-import com.example.market.dto.response.ResponseMessage;
-import com.example.market.entity.SalesItemEntity;
+import com.example.market.dto.request.SalesItemCreateRequest;
+import com.example.market.constants.ResponseMessage;
 import com.example.market.service.SalesItemService;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +30,7 @@ public class SalesItemController {
 	private final SalesItemService salesItemService;
 
 	@PostMapping
-	public Response<String> create(@Valid @RequestBody SalesItemRequest request) {
+	public Response<String> create(@Valid @RequestBody SalesItemCreateRequest request) {
 		salesItemService.create(
 			request.getTitle(),
 			request.getDescription(),
@@ -44,19 +42,19 @@ public class SalesItemController {
 	}
 
 	@GetMapping("/{itemId}")
-	public Response<SalesItemDto> getItem(@PathVariable Long itemId){
-		SalesItemDto getItemDto = salesItemService.getItem(itemId);
+	public Response<SalesItemResponse> getItem(@PathVariable Long itemId){
+		SalesItemResponse getItemDto = salesItemService.getItem(itemId);
 		return Response.success(getItemDto);
 	}
 
 	@GetMapping
-	public Response<Page<SalesItemDto>> getAllItems(@RequestParam(defaultValue = "0") int page,
+	public Response<Page<SalesItemResponse>> getAllItems(@RequestParam(defaultValue = "0") int page,
 												 @RequestParam(defaultValue = "10") int limit){
 		log.info(page + " " + limit);
 		return Response.success(salesItemService.getAllItems(page, limit));
 	}
 	@PutMapping("/{itemId}")
-	public Response<String> modify(@PathVariable Long itemId, @RequestBody SalesItemRequest request){
+	public Response<String> modify(@PathVariable Long itemId, @RequestBody SalesItemCreateRequest request){
 		salesItemService.modify(
 			itemId,
 			request.getTitle(),

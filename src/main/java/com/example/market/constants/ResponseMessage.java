@@ -1,4 +1,4 @@
-package com.example.market.dto.response;
+package com.example.market.constants;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
