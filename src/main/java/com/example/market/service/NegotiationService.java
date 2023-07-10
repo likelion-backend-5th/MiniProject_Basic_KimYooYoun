@@ -33,49 +33,32 @@ public class NegotiationService {
 		negotiationRepository.save(NegotiationEntity.of(savedItem, suggestedPrice, writer, password, NegotiationStatusType.제안));
 	}
 
-	public void modify(Long itemId, Long proposalId, String writer, String inputPassword, int suggestedPrice){
+	public void modify(Long itemId, Long proposalId, String requestWriter, String inputPassword, int suggestedPrice, String requestStatus){
 		SalesItemEntity savedItem = salesItemRepository.findById(itemId).orElseThrow( () ->
 			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
 
 		NegotiationEntity savedNego = negotiationRepository.findById(proposalId).orElseThrow( () ->
 			new ApplicationException(ErrorCode.NEGOTIATION_NOT_FOUND));
 
-		if(!isValidPassword(inputPassword, savedNego))// 네고 등록자만 네고 내용을 수정할 수 있음
-			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+		if(requestWriter.equals(savedItem.getWriter())){//writer가 SalesItem writer인 경우 - 네고 상태 변경
+			if(!isValidPassword(inputPassword, savedItem))// 상품 등록자와 같아야 상태를 변경할 수 있음
+				throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
 
-		savedNego.updateNegotiation(writer, inputPassword, suggestedPrice);
-		negotiationRepository.saveAndFlush(savedNego);
-	}
-	public void updateStatus(Long itemId, Long proposalId, String writer, String inputPassword, String status){
-		SalesItemEntity savedItem = salesItemRepository.findById(itemId).orElseThrow( () ->
-			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
+			savedNego.updateStatus(requestStatus);
 
-		NegotiationEntity savedNego = negotiationRepository.findById(proposalId).orElseThrow( () ->
-			new ApplicationException(ErrorCode.NEGOTIATION_NOT_FOUND));
+		}else{//writer가 Nego writer인 경우 - 네고 가격 변경
+			if(!isValidPassword(inputPassword, savedNego))// 네고 등록자와 같아야 가격을 변경할 수 있음
+				throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
 
-		if(!isValidPassword(inputPassword, savedItem))// 상품 등록자만 네고 상태를 변경할 수 있음
-			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
-
-		log.info(status);
-		switch(status){
-			case "확정":
-				savedItem.updateStatus(ItemStatusType.판매완료);
-				rejectProposals(savedItem.getItemId());// 해당 상품으로 등록되어있는 제안들 전부 거절하기
-				savedNego.updateStatus(NegotiationStatusType.확정); // 확정한 상품만 거절에서 확정으로 변경
-				break;
-			case "수락":
-				savedNego.updateStatus(NegotiationStatusType.수락);
-				break;
-			case "거절":
-				savedNego.updateStatus(NegotiationStatusType.거절);
-				break;
+			savedNego.updateSuggestedPrice(requestWriter, inputPassword, suggestedPrice);
 		}
 		negotiationRepository.saveAndFlush(savedNego);
 	}
-	private void rejectProposals(Long itemId){
+	public void rejectProposals(Long itemId){
 		List<NegotiationEntity> rejectedProposals =  negotiationRepository.findAllBySalesItemItemId(itemId);
 		rejectedProposals.stream()
-			.forEach(nego -> nego.updateStatus(NegotiationStatusType.거절));
+			.filter(nego -> nego.getStatus() == NegotiationStatusType.확정)// 확정난 네고는 제외하고
+			.forEach(nego -> nego.updateStatus("거절"));// 확정 이외의 status들은 전부 거절로 변경
 		negotiationRepository.saveAllAndFlush(rejectedProposals);
 	}
 	public void delete(Long proposalId, String writer, String inputPassword){
