@@ -27,7 +27,7 @@ import org.hibernate.annotations.Where;
 @Builder
 @SQLDelete(sql = "UPDATE negotiation SET deleted_at = NOW() where comment_id = ?")
 @Where(clause = "deleted_at is NULL")
-public class NegotiationEntity extends BaseDateEntity{
+public class NegotiationEntity extends BaseDateEntity implements PasswordCheckable{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long negotiationId;

@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import static com.example.market.util.ServiceUtils.isValidPassword;
 
 @Service
 @RequiredArgsConstructor
@@ -28,8 +29,6 @@ public class CommentService {
 		commentRepository.save(CommentEntity.of(savedItem, writer, password, contents));
 	}
 	public Page<CommentResponse> getAllCommentByItem(Long itemId){
-		SalesItemEntity savedItem = salesItemRepository.findById(itemId).orElseThrow( () ->
-			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
 		Pageable pageable = PageRequest.of(0, 10);
 		return commentRepository.findAllBySalesItemItemId(itemId, pageable).map(CommentResponse::fromEntity);
 	}
@@ -60,9 +59,6 @@ public class CommentService {
 
 		savedComment.addReply(reply);
 		commentRepository.saveAndFlush(savedComment);
-	}
-	private boolean isValidPassword(String inputPassword, CommentEntity savedItem){
-		return inputPassword.equals(savedItem.getPassword());
 	}
 	@Transactional
 	public void delete(Long itemId, Long commentId, String writer, String inputPassword){
