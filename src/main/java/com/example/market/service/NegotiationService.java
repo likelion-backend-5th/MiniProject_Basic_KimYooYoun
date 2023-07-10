@@ -1,10 +1,6 @@
 package com.example.market.service;
 
-import com.example.market.constants.ItemStatusType;
 import com.example.market.constants.NegotiationStatusType;
-import com.example.market.dto.response.Response;
-import com.example.market.dto.response.ResponseMessage;
-import com.example.market.entity.CommentEntity;
 import com.example.market.entity.NegotiationEntity;
 import com.example.market.entity.SalesItemEntity;
 import com.example.market.exception.ApplicationException;
@@ -12,10 +8,8 @@ import com.example.market.exception.ErrorCode;
 import com.example.market.repository.NegotiationRepository;
 import com.example.market.repository.SalesItemRepository;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.http11.filters.SavedRequestInputFilter;
 import org.springframework.stereotype.Service;
 
 @Service

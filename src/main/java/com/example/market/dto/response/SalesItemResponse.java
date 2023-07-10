@@ -1,21 +1,20 @@
-package com.example.market.dto;
+package com.example.market.dto.response;
 
-import com.example.market.constants.ItemStatusType;
 import com.example.market.entity.SalesItemEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class SalesItemDto {
+public class SalesItemResponse {
 	String title;
 	String description;
 	int minPriceWanted;
 	String imageUrl;
 	String status;
 
-	public static SalesItemDto fromEntity(SalesItemEntity salesItemEntity){
-		return new SalesItemDto(
+	public static SalesItemResponse fromEntity(SalesItemEntity salesItemEntity){
+		return new SalesItemResponse(
 			salesItemEntity.getTitle(),
 			salesItemEntity.getDescription(),
 			salesItemEntity.getMinPrice(),

@@ -1,9 +1,8 @@
 package com.example.market.dto.response;
 
-import com.example.market.constants.ItemStatusType;
+import com.example.market.constants.ResponseMessage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 @AllArgsConstructor
 @Getter

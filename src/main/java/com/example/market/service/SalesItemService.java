@@ -1,7 +1,7 @@
 package com.example.market.service;
 
 import com.example.market.constants.ItemStatusType;
-import com.example.market.dto.SalesItemDto;
+import com.example.market.dto.response.SalesItemResponse;
 import com.example.market.entity.SalesItemEntity;
 import com.example.market.exception.ApplicationException;
 import com.example.market.exception.ErrorCode;
@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,18 +36,18 @@ public class SalesItemService {
 		repository.save(
 			SalesItemEntity.of(title, description, minPrice, ItemStatusType.판매중, writer, password));
 	}
-	public SalesItemDto getItem(Long SalesItemId){
+	public SalesItemResponse getItem(Long SalesItemId){
 
 		SalesItemEntity savedItem = repository.findById(SalesItemId).orElseThrow( () ->
 			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
 
-		return SalesItemDto.fromEntity(savedItem);
+		return SalesItemResponse.fromEntity(savedItem);
 	}
-	public Page<SalesItemDto> getAllItems(int page, int limit){
+	public Page<SalesItemResponse> getAllItems(int page, int limit){
 		Pageable pageable = PageRequest.of(page, limit);
 		Page<SalesItemEntity> result = repository.findAll(pageable);
 		log.info("Result: {}", result.getContent());
-		return result.map(SalesItemDto::fromEntity);
+		return result.map(SalesItemResponse::fromEntity);
 	}
 	@Transactional
 	public void modify(

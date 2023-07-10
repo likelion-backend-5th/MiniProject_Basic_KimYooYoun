@@ -80,8 +80,5 @@ public class SalesItemEntity extends BaseDateEntity{
 		this.password = password;
 		return this;
 	}
-	public SalesItemEntity updateStatus(ItemStatusType type){
-		this.status = type;
-		return this;
-	}
+
 }
