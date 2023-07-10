@@ -28,8 +28,6 @@ public class CommentService {
 		commentRepository.save(CommentEntity.of(savedItem, writer, password, contents));
 	}
 	public Page<CommentResponse> getAllCommentByItem(Long itemId){
-		SalesItemEntity savedItem = salesItemRepository.findById(itemId).orElseThrow( () ->
-			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
 		Pageable pageable = PageRequest.of(0, 10);
 		return commentRepository.findAllBySalesItemItemId(itemId, pageable).map(CommentResponse::fromEntity);
 	}
