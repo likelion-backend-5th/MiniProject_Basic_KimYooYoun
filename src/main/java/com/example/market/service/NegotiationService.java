@@ -3,6 +3,7 @@ package com.example.market.service;
 import com.example.market.constants.NegotiationStatusType;
 import com.example.market.dto.response.NegotiationResponse;
 import com.example.market.entity.NegotiationEntity;
+import com.example.market.entity.PasswordCheckable;
 import com.example.market.entity.SalesItemEntity;
 import com.example.market.exception.ApplicationException;
 import com.example.market.exception.ErrorCode;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import static com.example.market.util.ServiceUtils.isValidPassword;
 
 @Service
 @RequiredArgsConstructor
@@ -97,10 +99,4 @@ public class NegotiationService {
 		negotiationRepository.delete(savedNego);
 	}
 
-	private boolean isValidPassword(String inputPassword, NegotiationEntity savedNegotiation){
-		return inputPassword.equals(savedNegotiation.getPassword());
-	}
-	private boolean isValidPassword(String inputPassword, SalesItemEntity savedItem){
-		return inputPassword.equals(savedItem.getPassword());
-	}
 }

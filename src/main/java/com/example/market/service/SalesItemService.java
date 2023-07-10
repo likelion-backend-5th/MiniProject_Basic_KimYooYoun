@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import static com.example.market.util.ServiceUtils.isValidPassword;
 
 @Service
 @Slf4j
@@ -68,9 +69,6 @@ public class SalesItemService {
 		repository.saveAndFlush(savedItem);
 	}
 
-	private boolean isValidPassword(String inputPassword, SalesItemEntity savedItem){
-		return inputPassword.equals(savedItem.getPassword());
-	}
 	@Transactional
 	public void addImage(Long salesItemId, MultipartFile multipartFile, String writer, String password)
 		throws IOException

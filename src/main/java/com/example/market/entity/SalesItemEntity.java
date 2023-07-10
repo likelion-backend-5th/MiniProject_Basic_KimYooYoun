@@ -25,7 +25,7 @@ import org.hibernate.annotations.Where;
 @Builder
 @SQLDelete(sql = "UPDATE sales_item SET deleted_at = NOW() where item_id = ?")
 @Where(clause = "deleted_at is NULL")
-public class SalesItemEntity extends BaseDateEntity{
+public class SalesItemEntity extends BaseDateEntity implements PasswordCheckable{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "item_id")

@@ -22,7 +22,7 @@ import org.hibernate.annotations.Where;
 @Builder
 @SQLDelete(sql = "UPDATE comments SET deleted_at = NOW() where comment_id = ?")
 @Where(clause = "deleted_at is NULL")
-public class CommentEntity extends BaseDateEntity{
+public class CommentEntity extends BaseDateEntity implements PasswordCheckable{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "comment_id")
