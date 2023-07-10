@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class NegotiationRequest {
+public class NegotiationCreateRequest {
 	private String writer;
 	private String password;
 	private int suggestedPrice;
