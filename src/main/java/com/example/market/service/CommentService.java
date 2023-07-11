@@ -7,6 +7,7 @@ import com.example.market.exception.ApplicationException;
 import com.example.market.exception.ErrorCode;
 import com.example.market.repository.CommentRepository;
 import com.example.market.repository.SalesItemRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,7 +31,7 @@ public class CommentService {
 	}
 	public Page<CommentResponse> getAllCommentByItem(Long itemId){
 		Pageable pageable = PageRequest.of(0, 10);
-		return commentRepository.findAllBySalesItemItemId(itemId, pageable).map(CommentResponse::fromEntity);
+		return commentRepository.findAllBySalesItem_ItemId(itemId, pageable).map(CommentResponse::fromEntity);
 	}
 	@Transactional
 	public void modify(Long itemId, Long commentId, String writer, String inputPassword, String contents){
@@ -72,6 +73,19 @@ public class CommentService {
 			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
 
 		commentRepository.delete(savedComment);
+	}
+
+	@Transactional
+	public void delete(Long itemId, String writer, String password){
+
+		List<CommentEntity> savedComments = commentRepository.findAllBySalesItem_ItemId(itemId)
+			.orElseThrow( () -> new ApplicationException(ErrorCode.COMMENT_NOT_FOUND));
+
+		if (savedComments.stream().noneMatch(entity -> isValidPassword(password, entity))) {
+			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+		}
+
+		commentRepository.deleteAll(savedComments);
 	}
 
 }
