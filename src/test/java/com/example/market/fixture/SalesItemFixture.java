@@ -1,6 +1,6 @@
 package com.example.market.fixture;
 
-import com.example.market.constants.ItemStatusType;
+import com.example.market.constraints.ItemStatusType;
 import com.example.market.entity.SalesItemEntity;
 
 public class SalesItemFixture {

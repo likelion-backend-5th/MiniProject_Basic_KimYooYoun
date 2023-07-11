@@ -1,6 +1,6 @@
 package com.example.market.entity;
 
-import com.example.market.constants.NegotiationStatusType;
+import com.example.market.constraints.NegotiationStatusType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -27,7 +27,7 @@ import org.hibernate.annotations.Where;
 @Builder
 @SQLDelete(sql = "UPDATE negotiation SET deleted_at = NOW() where comment_id = ?")
 @Where(clause = "deleted_at is NULL")
-public class NegotiationEntity extends BaseDateEntity{
+public class NegotiationEntity extends BaseDateEntity implements PasswordCheckable{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long negotiationId;
@@ -63,14 +63,28 @@ public class NegotiationEntity extends BaseDateEntity{
 			.status(status)
 			.build();
 	}
-	public NegotiationEntity updateNegotiation(String writer, String password, int suggestedPrice){
+	public NegotiationEntity updateSuggestedPrice(String writer, String password, int suggestedPrice){
 		this.writer = writer;
 		this.password = password;
 		this.suggestedPrice = suggestedPrice;
 		return this;
 	}
-	public NegotiationEntity updateStatus(NegotiationStatusType type){
-		this.status = type;
+
+	public NegotiationEntity updateStatus(String requestStatus){
+		NegotiationStatusType newStatusType = NegotiationStatusType.제안;// 초깃값 설정
+
+		switch(requestStatus){
+			case "수락":
+				newStatusType = NegotiationStatusType.수락;
+				break;
+			case "거절":
+				newStatusType = NegotiationStatusType.거절;
+				break;
+			case "확정":
+				newStatusType = NegotiationStatusType.확정;
+				break;
+		}
+		this.status = newStatusType;
 		return this;
 	}
 }

@@ -1,10 +1,7 @@
 package com.example.market.service;
 
-import com.example.market.constants.ItemStatusType;
-import com.example.market.constants.NegotiationStatusType;
-import com.example.market.dto.response.Response;
-import com.example.market.dto.response.ResponseMessage;
-import com.example.market.entity.CommentEntity;
+import com.example.market.constraints.NegotiationStatusType;
+import com.example.market.dto.response.NegotiationResponse;
 import com.example.market.entity.NegotiationEntity;
 import com.example.market.entity.SalesItemEntity;
 import com.example.market.exception.ApplicationException;
@@ -15,8 +12,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.http11.filters.SavedRequestInputFilter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import static com.example.market.util.ServiceUtils.isValidPassword;
 
 @Service
 @RequiredArgsConstructor
@@ -32,50 +33,59 @@ public class NegotiationService {
 
 		negotiationRepository.save(NegotiationEntity.of(savedItem, suggestedPrice, writer, password, NegotiationStatusType.제안));
 	}
-
-	public void modify(Long itemId, Long proposalId, String writer, String inputPassword, int suggestedPrice){
+	public Page<NegotiationResponse> getNegotiations(Long itemId, String requestWriter, String password, Integer pageNum) {
 		SalesItemEntity savedItem = salesItemRepository.findById(itemId).orElseThrow( () ->
 			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
 
-		NegotiationEntity savedNego = negotiationRepository.findById(proposalId).orElseThrow( () ->
-			new ApplicationException(ErrorCode.NEGOTIATION_NOT_FOUND));
+		Pageable pageable = PageRequest.of(pageNum - 1, 25);
 
-		if(!isValidPassword(inputPassword, savedNego))// 네고 등록자만 네고 내용을 수정할 수 있음
-			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+		if(requestWriter.equals(savedItem.getWriter())){// 상품 등록자가 요청 온 제안들을 모두 확인하는 경우
+			if(!isValidPassword(password, savedItem))//
+				throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
 
-		savedNego.updateNegotiation(writer, inputPassword, suggestedPrice);
-		negotiationRepository.saveAndFlush(savedNego);
+			return negotiationRepository.findAllBySalesItem_ItemId(itemId, pageable).map(NegotiationResponse::fromEntity);
+		}else{// 네고 등록자가 내가 등록한 네고를 확인하는 경우
+			List<NegotiationEntity> entities = negotiationRepository.findAllBySalesItem_ItemIdAndWriter(itemId, requestWriter)
+					.orElseThrow( () -> new ApplicationException(ErrorCode.NEGOTIATION_NOT_FOUND));
+
+			if (entities.stream().noneMatch(entity -> isValidPassword(password, entity))) {
+				throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+			}
+
+			return new PageImpl<>(entities.stream()
+									.map(NegotiationResponse::fromEntity)
+									.collect(Collectors.toList()),
+								pageable,
+								entities.size());
+		}
 	}
-	public void updateStatus(Long itemId, Long proposalId, String writer, String inputPassword, String status){
+
+	public void modify(Long itemId, Long proposalId, String requestWriter, String inputPassword, int suggestedPrice, String requestStatus){
 		SalesItemEntity savedItem = salesItemRepository.findById(itemId).orElseThrow( () ->
 			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
 
 		NegotiationEntity savedNego = negotiationRepository.findById(proposalId).orElseThrow( () ->
 			new ApplicationException(ErrorCode.NEGOTIATION_NOT_FOUND));
 
-		if(!isValidPassword(inputPassword, savedItem))// 상품 등록자만 네고 상태를 변경할 수 있음
-			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+		if(requestWriter.equals(savedItem.getWriter())){//writer가 SalesItem writer인 경우 - 네고 상태 변경
+			if(!isValidPassword(inputPassword, savedItem))// 상품 등록자와 같아야 상태를 변경할 수 있음
+				throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
 
-		log.info(status);
-		switch(status){
-			case "확정":
-				savedItem.updateStatus(ItemStatusType.판매완료);
-				rejectProposals(savedItem.getItemId());// 해당 상품으로 등록되어있는 제안들 전부 거절하기
-				savedNego.updateStatus(NegotiationStatusType.확정); // 확정한 상품만 거절에서 확정으로 변경
-				break;
-			case "수락":
-				savedNego.updateStatus(NegotiationStatusType.수락);
-				break;
-			case "거절":
-				savedNego.updateStatus(NegotiationStatusType.거절);
-				break;
+			savedNego.updateStatus(requestStatus);
+
+		}else{//writer가 Nego writer인 경우 - 네고 가격 변경
+			if(!isValidPassword(inputPassword, savedNego))// 네고 등록자와 같아야 가격을 변경할 수 있음
+				throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
+
+			savedNego.updateSuggestedPrice(requestWriter, inputPassword, suggestedPrice);
 		}
 		negotiationRepository.saveAndFlush(savedNego);
 	}
-	private void rejectProposals(Long itemId){
-		List<NegotiationEntity> rejectedProposals =  negotiationRepository.findAllBySalesItemItemId(itemId);
+	public void rejectProposals(Long itemId){
+		List<NegotiationEntity> rejectedProposals =  negotiationRepository.findAllBySalesItem_ItemId(itemId);
 		rejectedProposals.stream()
-			.forEach(nego -> nego.updateStatus(NegotiationStatusType.거절));
+			.filter(nego -> nego.getStatus() == NegotiationStatusType.확정)// 확정난 네고는 제외하고
+			.forEach(nego -> nego.updateStatus("거절"));// 확정 이외의 status들은 전부 거절로 변경
 		negotiationRepository.saveAllAndFlush(rejectedProposals);
 	}
 	public void delete(Long proposalId, String writer, String inputPassword){
@@ -86,13 +96,6 @@ public class NegotiationService {
 			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
 
 		negotiationRepository.delete(savedNego);
-	}
-
-	private boolean isValidPassword(String inputPassword, NegotiationEntity savedItem){
-		return inputPassword.equals(savedItem.getPassword());
-	}
-	private boolean isValidPassword(String inputPassword, SalesItemEntity savedItem){
-		return inputPassword.equals(savedItem.getPassword());
 	}
 
 }

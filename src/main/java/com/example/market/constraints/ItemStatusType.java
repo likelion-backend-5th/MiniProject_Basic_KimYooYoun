@@ -1,4 +1,4 @@
-package com.example.market.constants;
+package com.example.market.constraints;
 
 import lombok.Getter;
 

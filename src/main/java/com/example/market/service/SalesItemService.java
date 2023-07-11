@@ -1,7 +1,7 @@
 package com.example.market.service;
 
-import com.example.market.constants.ItemStatusType;
-import com.example.market.dto.SalesItemDto;
+import com.example.market.constraints.ItemStatusType;
+import com.example.market.dto.response.SalesItemResponse;
 import com.example.market.entity.SalesItemEntity;
 import com.example.market.exception.ApplicationException;
 import com.example.market.exception.ErrorCode;
@@ -14,17 +14,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import static com.example.market.util.ServiceUtils.isValidPassword;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class SalesItemService {
-
-	private final SalesItemRepository repository;
+	private final SalesItemRepository salesItemRepository;
+	private final CommentService commentService;
+	private final NegotiationService negotiationService;
 
 	@Transactional
 	public void create(
@@ -34,21 +35,21 @@ public class SalesItemService {
 			String writer,
 			String password
 	) {
-		repository.save(
+		salesItemRepository.save(
 			SalesItemEntity.of(title, description, minPrice, ItemStatusType.판매중, writer, password));
 	}
-	public SalesItemDto getItem(Long SalesItemId){
+	public SalesItemResponse getItem(Long SalesItemId){
 
-		SalesItemEntity savedItem = repository.findById(SalesItemId).orElseThrow( () ->
+		SalesItemEntity savedItem = salesItemRepository.findById(SalesItemId).orElseThrow( () ->
 			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
 
-		return SalesItemDto.fromEntity(savedItem);
+		return SalesItemResponse.fromEntity(savedItem);
 	}
-	public Page<SalesItemDto> getAllItems(int page, int limit){
+	public Page<SalesItemResponse> getAllItems(int page, int limit){
 		Pageable pageable = PageRequest.of(page, limit);
-		Page<SalesItemEntity> result = repository.findAll(pageable);
+		Page<SalesItemEntity> result = salesItemRepository.findAll(pageable);
 		log.info("Result: {}", result.getContent());
-		return result.map(SalesItemDto::fromEntity);
+		return result.map(SalesItemResponse::fromEntity);
 	}
 	@Transactional
 	public void modify(
@@ -59,24 +60,21 @@ public class SalesItemService {
 		String writer,
 		String password
 	){
-		SalesItemEntity savedItem = repository.findById(salesItemId).orElseThrow( () ->
+		SalesItemEntity savedItem = salesItemRepository.findById(salesItemId).orElseThrow( () ->
 			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
 
 		if(!isValidPassword(password, savedItem))
 			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
 
 		savedItem.updateSalesItem(title, description, minPrice, writer, password);
-		repository.saveAndFlush(savedItem);
+		salesItemRepository.saveAndFlush(savedItem);
 	}
 
-	private boolean isValidPassword(String inputPassword, SalesItemEntity savedItem){
-		return inputPassword.equals(savedItem.getPassword());
-	}
 	@Transactional
 	public void addImage(Long salesItemId, MultipartFile multipartFile, String writer, String password)
 		throws IOException
 	{
-		SalesItemEntity savedItem = repository.findById(salesItemId).orElseThrow( () ->
+		SalesItemEntity savedItem = salesItemRepository.findById(salesItemId).orElseThrow( () ->
 			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
 
 		if(!isValidPassword(password, savedItem))
@@ -85,7 +83,7 @@ public class SalesItemService {
 		String fileName = getImagePath(salesItemId, multipartFile);
 		multipartFile.transferTo(Path.of(fileName));
 		savedItem.setImageUrl(String.format("/static/%d/%s", salesItemId, fileName));
-		repository.saveAndFlush(savedItem);
+		salesItemRepository.saveAndFlush(savedItem);
 	}
 	private String getImagePath(Long id, MultipartFile file) throws IOException {
 		String imageDir = String.format("media/%d/", id);
@@ -97,15 +95,18 @@ public class SalesItemService {
 	}
 	@Transactional
 	public void delete(Long salesItemId, String writer, String password){
-		SalesItemEntity savedItem = repository.findById(salesItemId).orElseThrow( () ->
+		SalesItemEntity savedItem = salesItemRepository.findById(salesItemId).orElseThrow( () ->
 			new ApplicationException(ErrorCode.SALES_ITEM_NOT_FOUND));
 
 		if(!isValidPassword(password, savedItem))
 			throw new ApplicationException(ErrorCode.INVALID_PASSWORD);
 
-		//TODO :: deleteAllBysalesItem, comment, negotiation 전파
 		savedItem.setStatus(ItemStatusType.판매종료);
-		repository.saveAndFlush(savedItem);
-		repository.delete(savedItem);
+		salesItemRepository.saveAndFlush(savedItem);
+
+		//SalesItem 삭제와 함께 comment, negotiation 전파
+		salesItemRepository.delete(savedItem);
+		commentService.delete(salesItemId, writer, password);
+		negotiationService.delete(salesItemId, writer, password);
 	}
 }

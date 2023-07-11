@@ -1,6 +1,6 @@
 package com.example.market.entity;
 
-import com.example.market.constants.ItemStatusType;
+import com.example.market.constraints.ItemStatusType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,7 +13,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Tolerate;
 import org.hibernate.annotations.SQLDelete;
@@ -25,7 +24,7 @@ import org.hibernate.annotations.Where;
 @Builder
 @SQLDelete(sql = "UPDATE sales_item SET deleted_at = NOW() where item_id = ?")
 @Where(clause = "deleted_at is NULL")
-public class SalesItemEntity extends BaseDateEntity{
+public class SalesItemEntity extends BaseDateEntity implements PasswordCheckable{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "item_id")
@@ -80,8 +79,5 @@ public class SalesItemEntity extends BaseDateEntity{
 		this.password = password;
 		return this;
 	}
-	public SalesItemEntity updateStatus(ItemStatusType type){
-		this.status = type;
-		return this;
-	}
+
 }
